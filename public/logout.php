@@ -1,0 +1,1 @@
+<?php require __DIR__ . '/../private/inc/db.php'; session_destroy(); redirect('index.php');

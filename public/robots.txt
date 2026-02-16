@@ -1,0 +1,30 @@
+# robots.txt for HSC SuperContest
+
+User-agent: *
+# Allow general access to public pages
+Allow: /
+Allow: /index.php
+Allow: /register.php
+Allow: /assets/
+
+# Disallow admin pages
+Disallow: /admin.php
+Disallow: /admin_*.php
+Disallow: /api/admin/
+Disallow: /api/admin_*
+
+# Disallow API endpoints (to prevent indexing of dynamic content)
+Disallow: /api/
+
+# Disallow user-specific pages
+Disallow: /picks.php
+Disallow: /week_picks.php
+Disallow: /standings.php
+Disallow: /menu.php
+Disallow: /update.php
+
+# Disallow vendor directories
+Disallow: /vendor/
+
+# Crawl delay (optional, adjust as needed)
+# Crawl-delay: 10

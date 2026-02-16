@@ -1,0 +1,53 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+private/logs/
+public/logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# Dependency directories
+/vendor/
+node_modules/
+
+# Uploaded files
+private/storage/*.pdf
+public/uploads/
+
+# Database dumps
+*.sql.gz
+*.sql.backup
+backup-*.tar.gz
+
+# OS generated files
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# PHPUnit
+.phpunit.result.cache
+/phpunit.xml
+
+# Composer
+composer.phar
+composer.lock
+
+# Session files
+php_session_*
