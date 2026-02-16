@@ -51,3 +51,4 @@ composer.lock
 
 # Session files
 php_session_*
+public/connections.php
