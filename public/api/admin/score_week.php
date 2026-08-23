@@ -5,14 +5,13 @@
  * Location: /home/public/api/admin/score_week.php
  *
  * Web usage:
- *   /api/admin/score_week.php?year=2025&week=7
- *   /api/admin/score_week.php?year=2025&week=7&debug=1   (verbose output)
+ *   POST /api/admin/score_week.php with season, week, and csrf_token fields
  *
  * CLI usage:
  *   php /home/public/api/admin/score_week.php 2025 7
  *
  * Behavior:
- *   - If debug=1 (or running via CLI), prints status/results and PHP errors.
+ *   - CLI prints detailed status; authenticated web requests return a summary.
  *   - Otherwise, runs silently with no output (safe for include()).
  */
 
@@ -31,11 +30,15 @@ if (!$isCli) {
     require $INC_BASE . '/auth_guard.php';
     admin_required();
 
-    // CSRF protection for POST requests
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        require $INC_BASE . '/csrf.php';
-        csrf_protect();
+    // Scoring changes stored results, so browser requests must be POST + CSRF.
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        header('Allow: POST');
+        http_response_code(405);
+        echo "Method not allowed.\n";
+        exit;
     }
+    require $INC_BASE . '/csrf.php';
+    csrf_protect();
 }
 
 // Prefer POST, then GET params for web, argv for CLI. Provide sane defaults.
@@ -58,10 +61,10 @@ if ($week < 1 || $week > 30) { // tweak max week if needed
     $week = 1;
 }
 
-// Error visibility: only show when debugging/CLI
-@ini_set('display_errors', $debug ? '1' : '0');
-@ini_set('display_startup_errors', $debug ? '1' : '0');
-@error_reporting($debug ? E_ALL : 0);
+// Never render PHP errors into a web response. CLI retains verbose diagnostics.
+@ini_set('display_errors', $isCli ? '1' : '0');
+@ini_set('display_startup_errors', $isCli ? '1' : '0');
+@error_reporting(E_ALL);
 
 // ----- Execute -----
 try {
@@ -82,17 +85,13 @@ try {
         // $GLOBALS['score_week_last_result'] = $result;
     }
 } catch (Throwable $e) {
-    if ($debug) {
-        if (!$isCli) {
-            header('Content-Type: text/plain; charset=UTF-8');
-        }
-        // Print full error details in debug mode
+    error_log('score_week failed: ' . $e->getMessage());
+    if ($isCli) {
         echo "Error scoring season {$season}, week {$week}:\n";
         echo $e->getMessage() . "\n";
         echo $e->getTraceAsString() . "\n";
     } else {
-        // Silent on error when not debugging
-        // Optional: log to file/system logger if you like
-        // error_log($e);
+        http_response_code(500);
+        echo "Unable to score week.\n";
     }
 }

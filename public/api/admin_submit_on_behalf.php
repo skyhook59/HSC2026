@@ -4,6 +4,13 @@ require __DIR__ . '/../../private/inc/auth_guard.php';
 require __DIR__ . '/../../private/inc/csrf.php';
 admin_required();
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+  header('Allow: POST');
+  http_response_code(405);
+  echo "Method not allowed.";
+  exit;
+}
+
 // CSRF protection
 csrf_protect();
 
@@ -74,7 +81,8 @@ try {
   redirect('admin.php');
 } catch (Throwable $e) {
   if ($db->inTransaction()) $db->rollBack();
+  error_log('Admin pick submission failed: ' . $e->getMessage());
   http_response_code(500);
-  echo "Failed to save picks: " . $e->getMessage();
+  echo "Failed to save picks.";
   exit;
 }

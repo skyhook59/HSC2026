@@ -34,6 +34,8 @@ public/uploads/
 *.sql.gz
 *.sql.backup
 backup-*.tar.gz
+# Historical exports contain private account and unrelated personal data.
+old_databases/
 
 # OS generated files
 Thumbs.db

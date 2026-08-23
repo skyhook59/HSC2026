@@ -21,6 +21,9 @@
 
 // Don't apply security headers for health check (some monitoring tools don't like them)
 // Instead, manually set minimal headers
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+error_reporting(E_ALL);
 header('Content-Type: application/json; charset=UTF-8');
 
 $health = [
@@ -53,9 +56,9 @@ try {
     $db->query('SELECT 1');
     $health['checks']['database'] = 'ok';
 } catch (Throwable $e) {
+    error_log('Health check database failure: ' . $e->getMessage());
     $health['ok'] = false;
     $health['checks']['database'] = 'failed';
-    $health['errors']['database'] = $e->getMessage();
 }
 
 // Check: Session support
@@ -65,9 +68,9 @@ try {
     }
     $health['checks']['session'] = 'ok';
 } catch (Throwable $e) {
+    error_log('Health check session failure: ' . $e->getMessage());
     $health['ok'] = false;
     $health['checks']['session'] = 'failed';
-    $health['errors']['session'] = $e->getMessage();
 }
 
 // Check: Filesystem (logs directory writable)
@@ -83,9 +86,9 @@ try {
     }
     $health['checks']['filesystem'] = 'ok';
 } catch (Throwable $e) {
+    error_log('Health check filesystem failure: ' . $e->getMessage());
     $health['ok'] = false;
     $health['checks']['filesystem'] = 'failed';
-    $health['errors']['filesystem'] = $e->getMessage();
 }
 
 // Set HTTP status code

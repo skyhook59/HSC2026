@@ -1,4 +1,11 @@
 <?php
+// Log server-side diagnostics without rendering paths, queries, or credentials.
+if (PHP_SAPI !== 'cli') {
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
+    error_reporting(E_ALL);
+}
+
 // Apply security headers
 require_once __DIR__ . '/security_headers.php';
 
@@ -53,9 +60,8 @@ try {
 } catch (Throwable $e) {
   http_response_code(500);
   header('Content-Type: text/plain');
-  echo "DB connection failed\n";
-  echo $e->getMessage();
-  error_log($e->getMessage());
+  echo "Database connection failed.\n";
+  error_log('Database connection failed: ' . $e->getMessage());
   exit;
 }
 // --- Long-lived session config (e.g. 60 days) ---
@@ -82,7 +88,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 // Feed secret for API authentication
 $FEED_SECRET = getenv('FEED_SECRET');
 if (!$FEED_SECRET) {
-    error_log('WARNING: FEED_SECRET not set. API authentication disabled.');
+    error_log('WARNING: FEED_SECRET not set. Automated feed endpoints are unavailable.');
 }
 if (!defined('FEED_SECRET') && $FEED_SECRET) {
     define('FEED_SECRET', $FEED_SECRET);

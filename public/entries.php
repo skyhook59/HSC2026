@@ -1,7 +1,9 @@
 <?php
 // Include necessary files to get the week info
 require __DIR__ . '/../private/inc/db.php';
+require __DIR__ . '/../private/inc/auth_guard.php';
 require __DIR__ . '/../private/inc/week.php';
+auth_required();
 [$AUTO_SEASON, $AUTO_WEEK] = current_season_week($db);
 ?>
 <!doctype html>

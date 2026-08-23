@@ -25,6 +25,8 @@ if (!$user || !password_verify($pass, $user['password_hash'])) {
 // Successful login - reset rate limit
 rate_limit_reset($db, 'login_' . $clientIp);
 
+// Prevent an attacker from fixing a session ID before login.
+session_regenerate_id(true);
 $_SESSION['user_id'] = $user['id'];
 $_SESSION['name'] = $user['name'];
 $_SESSION['is_admin'] = (int)$user['is_admin'];

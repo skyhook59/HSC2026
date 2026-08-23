@@ -1,22 +1,16 @@
 <?php
 declare(strict_types=1);
-ini_set('display_errors', '1');
+ini_set('display_errors', '0');
 error_reporting(E_ALL);
 header('Content-Type: application/json');
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
 
 require __DIR__ . '/../../private/inc/db.php';
+require __DIR__ . '/../../private/inc/auth_guard.php';
 require __DIR__ . '/../../private/inc/week.php';
 
 /* Auth */
+api_auth_required();
 $userId = (int)($_SESSION['user_id'] ?? 0);
-if (!$userId) {
-    http_response_code(401);
-    echo json_encode(['ok' => false, 'error' => 'auth_required']);
-    exit;
-}
 
 $season = (int)($_GET['season'] ?? 0);
 $week = (int)($_GET['week'] ?? 0);
@@ -84,6 +78,7 @@ try {
     ]);
 
 } catch (PDOException $e) {
+    error_log('my_picks database error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['ok' => false, 'error' => 'db_error', 'message' => $e->getMessage()]);
+    echo json_encode(['ok' => false, 'error' => 'db_error']);
 }

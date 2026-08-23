@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-ini_set('display_errors', '1');
+ini_set('display_errors', '0');
 error_reporting(E_ALL);
 header('Content-Type: application/json');
 
@@ -10,14 +10,9 @@ require __DIR__ . '/../../private/inc/auth_guard.php';
 require __DIR__ . '/../../private/inc/week.php';
 require __DIR__ . '/../../private/inc/week_lock_helpers.php';
 
-auth_required();
+api_auth_required();
 
 $userId = (int)($_SESSION['user_id'] ?? 0);
-if (!$userId) {
-    http_response_code(401);
-    echo json_encode(['ok' => false, 'error' => 'auth_required']);
-    exit;
-}
 
 // --- Determine season/week from query, with sane defaults ---
 [$AUTO_SEASON, $AUTO_WEEK, $status] = current_season_week($db);

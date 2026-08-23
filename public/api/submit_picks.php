@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-ini_set('display_errors', '1');
+ini_set('display_errors', '0');
 error_reporting(E_ALL);
 header('Content-Type: application/json');
 
@@ -12,16 +12,10 @@ require __DIR__ . '/../../private/inc/validate_picks.php';
 require __DIR__ . '/../../private/inc/email.php';
 require __DIR__ . '/../../private/inc/week_lock_helpers.php';
 
-/**
- * Simple GET probe so you can quickly verify the handler is wired up.
- * Example: /api/submit_picks.php?test=1
- */
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['test'])) {
-    echo json_encode([
-        'ok'      => true,
-        'handler' => 'submit_picks.php',
-        'version' => 'v2025-12-05-01',
-    ]);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Allow: POST');
+    http_response_code(405);
+    echo json_encode(['ok' => false, 'error' => 'method_not_allowed']);
     exit;
 }
 
@@ -224,7 +218,7 @@ exit;
     echo json_encode([
         'ok'      => false,
         'error'   => 'db_error',
-        'message' => $e->getMessage(),
+        'message' => 'Unable to save picks.',
     ]);
     exit;
 }

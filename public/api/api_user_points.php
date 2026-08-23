@@ -4,7 +4,7 @@
 require __DIR__ . '/../../private/inc/db.php';
 require __DIR__ . '/../../private/inc/auth_guard.php';
 require __DIR__ . '/../../private/inc/week.php';
-auth_required();
+api_auth_required();
 
 header('Content-Type: application/json');
 
@@ -42,6 +42,7 @@ try {
     }
     echo json_encode(['labels' => $labels, 'values' => $values]);
 } catch (Throwable $e) {
+    error_log('api_user_points error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => 'Server error', 'detail' => $e->getMessage()]);
+    echo json_encode(['error' => 'Server error']);
 }

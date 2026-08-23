@@ -4,7 +4,7 @@
 /**
  * Location: /home/public/api/admin/update_scores.php
  *
- * Web usage (silent by default; debug emits JSON):
+ * Web usage with X-FEED-SECRET (silent by default; debug emits JSON):
  *   /api/admin/update_scores.php?season=2025&seasontype=2&mode=single&week=7
  *   /api/admin/update_scores.php?season=2025&seasontype=2&mode=single&week=7&debug=1
  *
@@ -15,14 +15,14 @@
  *   week=1                (required for single)
  *   from=1&to=18          (for range)
  *   create_if_missing=1
- *   debug=1               (optional; when present, emits JSON + errors)
+ *   debug=1               (optional; when present, emits JSON)
  */
 
 // ---- debug/silent behavior ----
 $debug = isset($_GET['debug']) && $_GET['debug'] === '1';
-@ini_set('display_errors', $debug ? '1' : '0');
-@ini_set('display_startup_errors', $debug ? '1' : '0');
-@error_reporting($debug ? E_ALL : 0);
+@ini_set('display_errors', '0');
+@ini_set('display_startup_errors', '0');
+@error_reporting(E_ALL);
 
 // Only set headers / print output if debugging.
 $emit = $debug;
@@ -32,22 +32,21 @@ if ($emit && !headers_sent()) {
   header('Content-Type: application/json; charset=UTF-8');
 }
 
-// ---- Auth (enable by setting FEED_SECRET const or env var) ----
-$cfgSecret = defined('FEED_SECRET') ? FEED_SECRET : getenv('FEED_SECRET');
-if ($cfgSecret) {
-  $hdrSecret = $_SERVER['HTTP_X_FEED_SECRET'] ?? '';
-  $qsSecret  = $_GET['secret'] ?? '';
-  if (!hash_equals((string)$cfgSecret, (string)($hdrSecret ?: $qsSecret))) {
-    if (!headers_sent()) http_response_code(401);
-    if ($emit) echo json_encode(['ok'=>false,'error'=>'unauthorized']);
-    // Silent mode: no output.
-    return;
-  }
-}
-
 // ---- Includes ----
-require __DIR__ . '/../../../private/inc/db.php'; // provides $db (PDO)
+require __DIR__ . '/../../../private/inc/db.php'; // provides $db (PDO) and FEED_SECRET
 require __DIR__ . '/../../../private/inc/update_scores_core.php'; // provides helper functions
+
+// ---- Auth: this endpoint is unavailable unless a feed secret is configured ----
+$cfgSecret = defined('FEED_SECRET') ? FEED_SECRET : getenv('FEED_SECRET');
+$hdrSecret = $_SERVER['HTTP_X_FEED_SECRET'] ?? '';
+if (!$cfgSecret || !$hdrSecret || !hash_equals((string)$cfgSecret, (string)$hdrSecret)) {
+  if (!headers_sent()) {
+    header('Content-Type: application/json; charset=UTF-8');
+    http_response_code(401);
+  }
+  echo json_encode(['ok'=>false,'error'=>'unauthorized']);
+  exit;
+}
 
 // ---- Inputs ----
 $season      = isset($_GET['season']) ? (int)$_GET['season'] : (int)date('Y');
@@ -128,9 +127,9 @@ try {
     echo json_encode($out);
   }
 } catch (Throwable $e) {
+  error_log('update_scores failed: ' . $e->getMessage());
   if (!headers_sent()) http_response_code(500);
-  $payload = ['ok'=>false,'error'=>'update_failed','message'=>$debug ? $e->getMessage() : 'internal error'];
-  if ($debug) $payload['trace'] = $e->getTraceAsString();
+  $payload = ['ok'=>false,'error'=>'update_failed','message'=>'internal error'];
 
   // expose error result for includes
   $GLOBALS['update_scores_result'] = $payload;

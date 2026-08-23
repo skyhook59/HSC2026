@@ -4,7 +4,6 @@ User-agent: *
 # Allow general access to public pages
 Allow: /
 Allow: /index.php
-Allow: /register.php
 Allow: /assets/
 
 # Disallow admin pages
@@ -21,7 +20,6 @@ Disallow: /picks.php
 Disallow: /week_picks.php
 Disallow: /standings.php
 Disallow: /menu.php
-Disallow: /update.php
 
 # Disallow vendor directories
 Disallow: /vendor/

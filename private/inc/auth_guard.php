@@ -5,6 +5,15 @@ function auth_required() {
   }
 }
 
+function api_auth_required() {
+  if (empty($_SESSION['user_id'])) {
+    http_response_code(401);
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode(['ok' => false, 'error' => 'auth_required']);
+    exit;
+  }
+}
+
 function admin_required() {
   if (empty($_SESSION['user_id'])) {
     redirect('index.php');

@@ -1,5 +1,8 @@
 <?php
 require __DIR__ . '/../../private/inc/db.php';
+require __DIR__ . '/../../private/inc/auth_guard.php';
+api_auth_required();
+
 $season = (int)($_GET['season'] ?? date('Y'));
 $week   = (int)($_GET['week'] ?? 1);
 $includeStarted = isset($_GET['include_started']) && $_GET['include_started']==='1';

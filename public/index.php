@@ -45,7 +45,7 @@ $err = $_GET['err'] ?? '';
         </div>
         <button class="btn btn--primary" style="width:100%">Sign in</button>
       </form>
-      <div class="help mt-16">No account? <a href="<?= url('register.php') ?>" class="subtle" style="text-decoration:underline">Register</a></div>
+      <div class="help mt-16">Need an account? Contact the pool administrator.</div>
     </div>
   </section>
 </main>

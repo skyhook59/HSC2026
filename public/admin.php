@@ -11,8 +11,9 @@ try {
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     // Handle database error gracefully
+    error_log('Admin user-list load failed: ' . $e->getMessage());
     $users = [];
-    $error_message = "Failed to load user list: " . $e->getMessage();
+    $error_message = "Failed to load user list.";
 }
 
 ?>
